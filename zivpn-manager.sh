@@ -36,7 +36,7 @@ check_root() {
 }
 
 get_ip() {
-    curl -s ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}'
+    curl -4 -s ifconfig.me 2>/dev/null || curl -4 -s icanhazip.com 2>/dev/null || hostname -I | awk '{for(i=1;i<=NF;i++) if($i !~ /:/) {print $i; exit}}'
 }
 
 is_installed() {
