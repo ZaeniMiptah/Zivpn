@@ -218,12 +218,12 @@ EOF
     sysctl -w net.core.rmem_max=16777216 > /dev/null 2>&1
     sysctl -w net.core.wmem_max=16777216 > /dev/null 2>&1
 
-    IFACE=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
-    iptables -t nat -A PREROUTING -i "$IFACE" -p udp --dport 1:65535 -j DNAT --to-destination :5667 2>/dev/null
+    IFACE=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(S+)' | head -1)
+    iptables -t nat -A PREROUTING -i "$IFACE" -p udp --dport 6000:19999 -j DNAT --to-destination :5667 2>/dev/null
 
     ufw allow 22/tcp > /dev/null 2>&1
     ufw allow 5667/udp > /dev/null 2>&1
-    ufw allow 1:65535/udp > /dev/null 2>&1
+    ufw allow 6000:19999/udp > /dev/null 2>&1
     ufw --force enable > /dev/null 2>&1
     echo -e "${GREEN}    ✓ Selesai${NC}"
 
@@ -279,15 +279,24 @@ CRONEOF
     echo -e "${GREEN}  ✓ ZIVPN UDP BERHASIL DIINSTALL!${NC}"
     echo -e "${WHITE}══════════════════════════════════════════${NC}"
     echo -e "  IP VPS  : ${CYAN}$(get_ip)${NC}"
-    echo -e "  Port    : ${CYAN}1-65535 (semua port UDP)${NC}"
+    echo -e "  Port    : ${CYAN}5667 / 6000-19999 (UDP)${NC}"
     echo -e "  Status  : ${GREEN}$(systemctl is-active zivpn.service)${NC}"
     echo -e "${WHITE}══════════════════════════════════════════${NC}"
     echo ""
-    echo -e "${YELLOW}Cara pakai di ZIVPN App (UDP Tunnel):${NC}"
-    echo -e "  1. Buka ZIVPN 2192 centang UDP Tunnel"
-    echo -e "  2. UDP Server  : $(get_ip)"
-    echo -e "  3. UDP Password: [password user dari menu Tambah User]"
-    echo -e "  4. Tap APPLY 2192 START"
+    echo -e "${YELLOW}  Cara connect di ZIVPN App:${NC}"
+    echo -e "  1. Buka ZIVPN → centang ${BOLD}UDP Tunnel${NC}"
+    echo -e "  2. UDP Server  : ${CYAN}$(get_ip)${NC}"
+    echo -e "  3. UDP Password: ${CYAN}[buat dulu via menu Tambah User]${NC}"
+    echo -e "  4. Tap APPLY → START"
+    echo ""
+
+    # Pasang shortcut 'zivpn' biar bisa dipanggil dari mana saja
+    cp "$(realpath $0)" /usr/local/bin/zivpn-menu 2>/dev/null
+    chmod +x /usr/local/bin/zivpn-menu 2>/dev/null
+    if ! grep -q "zivpn-menu" /root/.bashrc 2>/dev/null; then
+        echo "alias zivpn='bash /usr/local/bin/zivpn-menu'" >> /root/.bashrc
+    fi
+    echo -e "${GREEN}  Tip: Ketik ${BOLD}zivpn${NC}${GREEN} kapanpun untuk buka menu ini${NC}"
     echo ""
     press_enter
 }
@@ -673,6 +682,8 @@ uninstall_zivpn() {
     rm -f "$SERVICE_FILE"
     rm -f "$ZIVPN_BIN"
     rm -f /usr/local/bin/zivpn-cron.sh
+    rm -f /usr/local/bin/zivpn-menu
+    sed -i "/alias zivpn=/d" /root/.bashrc 2>/dev/null
     rm -rf "$ZIVPN_DIR"
 
     systemctl daemon-reload
@@ -682,8 +693,10 @@ uninstall_zivpn() {
 
     echo ""
     echo -e "${GREEN}  ✓ ZIVPN UDP berhasil diuninstall!${NC}"
+    echo -e "${YELLOW}  Keluar dari menu...${NC}"
     echo ""
-    press_enter
+    sleep 2
+    exit 0
 }
 
 # === MENU UTAMA ===
@@ -696,13 +709,11 @@ main_menu() {
             echo -e "${RED}  [!] ZIVPN belum terinstall!${NC}"
             echo ""
             echo -e "  ${GREEN}1${NC}. Install ZIVPN UDP"
-            echo -e "  ${RED}0${NC}. Keluar"
             echo ""
             echo -e "${WHITE}  ────────────────────────────────────────${NC}"
-            read -rp "$(echo -e "  ${WHITE}Pilih menu [0-1] : ${NC}")" choice
+            read -rp "$(echo -e "  ${WHITE}Pilih menu [1] : ${NC}")" choice
             case $choice in
                 1) install_zivpn ;;
-                0) echo -e "${YELLOW}Sampai jumpa!${NC}"; exit 0 ;;
                 *) echo -e "${RED}Pilihan tidak valid!${NC}"; sleep 1 ;;
             esac
         else
@@ -717,10 +728,9 @@ main_menu() {
             echo ""
             echo -e "  ${GREEN}8${NC}. Update Script"
             echo -e "  ${RED}9${NC}. Uninstall ZIVPN"
-            echo -e "  ${RED}0${NC}. Keluar"
             echo ""
             echo -e "${WHITE}  ────────────────────────────────────────${NC}"
-            read -rp "$(echo -e "  ${WHITE}Pilih menu [0-9] : ${NC}")" choice
+            read -rp "$(echo -e "  ${WHITE}Pilih menu [1-9] : ${NC}")" choice
 
             case $choice in
                 1) add_user ;;
@@ -732,7 +742,6 @@ main_menu() {
                 7) restart_service ;;
                 8) update_script ;;
                 9) uninstall_zivpn ;;
-                0) echo -e "${YELLOW}Sampai jumpa!${NC}"; exit 0 ;;
                 *) echo -e "${RED}Pilihan tidak valid!${NC}"; sleep 1 ;;
             esac
         fi
