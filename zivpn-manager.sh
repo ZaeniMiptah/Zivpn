@@ -617,7 +617,7 @@ update_script() {
     echo ""
 
     # Ganti URL ini dengan URL raw script GitHub kamu nanti
-    local SCRIPT_URL="https://raw.githubusercontent.com/USERNAMEKAMU/udp-zivpn-manager/main/zivpn-manager.sh"
+    local SCRIPT_URL="https://raw.githubusercontent.com/ZaeniMiptah/Zivpn/main/zivpn-manager.sh"
     local SCRIPT_PATH=$(realpath "$0")
 
     echo -e "  Mengecek update dari GitHub..."
@@ -707,38 +707,4 @@ main_menu() {
         else
             echo -e "  ${GREEN}1${NC}. Tambah User"
             echo -e "  ${RED}2${NC}. Hapus User"
-            echo -e "  ${CYAN}3${NC}. Daftar User"
-            echo -e "  ${YELLOW}4${NC}. Perpanjang User"
-            echo -e "  ${PURPLE}5${NC}. Hapus User Expired"
-            echo ""
-            echo -e "  ${BLUE}6${NC}. Status Service"
-            echo -e "  ${BLUE}7${NC}. Restart Service"
-            echo ""
-            echo -e "  ${GREEN}8${NC}. Update Script"
-            echo -e "  ${RED}9${NC}. Uninstall ZIVPN"
-            echo -e "  ${RED}0${NC}. Keluar"
-            echo ""
-            echo -e "${WHITE}  ────────────────────────────────────────${NC}"
-            read -rp "$(echo -e "  ${WHITE}Pilih menu [0-9] : ${NC}")" choice
-
-            case $choice in
-                1) add_user ;;
-                2) delete_user ;;
-                3) list_users ;;
-                4) renew_user ;;
-                5) clean_expired ;;
-                6) status_service ;;
-                7) restart_service ;;
-                8) update_script ;;
-                9) uninstall_zivpn ;;
-                0) echo -e "${YELLOW}Sampai jumpa!${NC}"; exit 0 ;;
-                *) echo -e "${RED}Pilihan tidak valid!${NC}"; sleep 1 ;;
-            esac
-        fi
-    done
-}
-
-# === ENTRY POINT ===
-
-check_root
-main_menu
+      
