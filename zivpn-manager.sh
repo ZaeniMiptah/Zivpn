@@ -221,6 +221,7 @@ EOF
     IFACE=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
     iptables -t nat -A PREROUTING -i "$IFACE" -p udp --dport 1:65535 -j DNAT --to-destination :5667 2>/dev/null
 
+    ufw allow 22/tcp > /dev/null 2>&1
     ufw allow 5667/udp > /dev/null 2>&1
     ufw allow 1:65535/udp > /dev/null 2>&1
     ufw --force enable > /dev/null 2>&1
